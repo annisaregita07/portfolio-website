@@ -163,14 +163,14 @@ export default function App() {
 
     try {
       await emailjs.send(
-        "service_a904dsu",
-        "template_qq3sq8n",
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         {
           from_name: formData.name,
           from_email: formData.email,
           message: formData.message,
         },
-        "_fmLYvgIZpgobwki3",
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
       );
 
       setSubmitted(true);
