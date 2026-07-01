@@ -13,7 +13,6 @@ import {
   Linkedin,
   ExternalLink,
   MapPin,
-  Download,
   Award,
   BadgeCheck,
 } from "lucide-react";
@@ -322,19 +321,13 @@ export default function App() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.5 }}
-            className="flex flex-wrap items-center gap-3"
+            className="flex items-center"
           >
             <button
               onClick={() => scrollTo("projects")}
               className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:gap-3 duration-200"
             >
               View My Work <ArrowRight size={15} />
-            </button>
-            <button
-              onClick={() => scrollTo("contact")}
-              className="flex items-center gap-2 px-6 py-3 border border-border rounded-full text-sm font-medium text-foreground hover:bg-secondary transition-colors"
-            >
-              <Download size={14} /> Download CV
             </button>
           </motion.div>
 
