@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import annisaPhoto from "../assets/annisa.png";
 import ccsc from "../assets/certificates/ccsc.jpeg";
 import emailjs from "@emailjs/browser";
 import ambassador from "../assets/certificates/student-ambassador.jpeg";
+import ReCAPTCHA from "react-google-recaptcha";
 import {
   Menu,
   X,
@@ -137,6 +138,9 @@ export default function App() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   useEffect(() => {
     const id = setInterval(
@@ -159,6 +163,10 @@ export default function App() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captcha) {
+      alert("Please verify that you're not a robot.");
+      return;
+    }
 
     try {
       await emailjs.send(
@@ -173,6 +181,8 @@ export default function App() {
       );
 
       setSubmitted(true);
+      recaptchaRef.current?.reset();
+      setCaptcha(null);
 
       setFormData({
         name: "",
@@ -406,8 +416,51 @@ export default function App() {
           </div>
         </div>
       </section>
+      {/* ── SKILLS ── */}
+      <section id="skills" className="py-28 bg-muted">
+        <div className="px-8 md:px-16 lg:px-24 max-w-6xl mx-auto">
+          <p className="text-xs tracking-[0.2em] uppercase text-primary/70 font-medium mb-4">
+            What I Know
+          </p>
+          <h2
+            className="text-4xl md:text-5xl font-normal text-foreground mb-14 leading-tight"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            Skills &amp; Tools
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-10">
+            {Object.entries(skills).map(([category, items], i) => (
+              <motion.div
+                key={category}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.15 }}
+              >
+                <h3
+                  className="text-lg font-normal text-foreground mb-5 pb-4 border-b border-border"
+                  style={{ fontFamily: "var(--font-serif)" }}
+                >
+                  {category}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {items.map((skill) => (
+                    <span
+                      key={skill}
+                      className="text-sm px-3 py-1.5 bg-card border border-border text-foreground rounded-full hover:bg-secondary hover:text-primary hover:border-primary/20 transition-colors cursor-default"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
       {/* ── PROJECTS ── */}
-      <section id="projects" className="py-28 bg-muted">
+      <section id="projects" className="pt-40 pb-28 ">
         <div className="px-8 md:px-16 lg:px-24 max-w-6xl mx-auto">
           <div className="flex items-end justify-between mb-14">
             <div>
@@ -486,121 +539,79 @@ export default function App() {
         </div>
       </section>
       {/* ── CERTIFICATES ── */}
-      <section
-        id="certificates"
-        className="py-28 px-8 md:px-16 lg:px-24 max-w-6xl mx-auto"
-      >
-        <div className="flex items-end justify-between mb-14">
-          <div>
-            <p className="text-xs tracking-[0.2em] uppercase text-primary/70 font-medium mb-4">
-              Credentials
-            </p>
-            <h2
-              className="text-4xl md:text-5xl font-normal text-foreground leading-tight"
-              style={{ fontFamily: "var(--font-serif)" }}
-            >
-              Certificates
-            </h2>
+      <section id="certificates" className="py-28 bg-muted">
+        <div className="max-w-6xl mx-auto px-8 md:px-16 lg:px-24">
+          <div className="flex items-end justify-between mb-14">
+            <div>
+              <p className="text-xs tracking-[0.2em] uppercase text-primary/70 font-medium mb-4">
+                Credentials
+              </p>
+              <h2
+                className="text-4xl md:text-5xl font-normal text-foreground leading-tight"
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
+                Certificates
+              </h2>
+            </div>
+            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-secondary rounded-full text-sm text-primary font-medium">
+              <Award size={14} /> {certificates.length} earned
+            </div>
           </div>
-          <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-secondary rounded-full text-sm text-primary font-medium">
-            <Award size={14} /> {certificates.length} earned
-          </div>
-        </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {certificates.map((c, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: i * 0.08 }}
-              className="group overflow-hidden bg-card border border-border rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-            >
-              {/* Preview */}
-              <div className="overflow-hidden">
-                <img
-                  src={c.image}
-                  alt={c.title}
-                  className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-
-              {/* Content */}
-              <div className="p-6">
-                <span className="inline-block text-[10px] tracking-wider uppercase px-2.5 py-1 bg-secondary text-primary rounded-full font-medium mb-3">
-                  {c.category}
-                </span>
-
-                <h3 className="text-base font-semibold text-foreground leading-snug mb-1">
-                  {c.title}
-                </h3>
-
-                <p className="text-sm text-muted-foreground mb-4">{c.issuer}</p>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    {c.date}
-                  </span>
-
-                  {c.link ? (
-                    <a
-                      href={c.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary flex items-center gap-1 hover:underline"
-                    >
-                      View
-                      <ExternalLink size={14} />
-                    </a>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">
-                      Certificate
-                    </span>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-      {/* ── SKILLS ── */}
-      <section id="skills" className="py-28 bg-muted">
-        <div className="px-8 md:px-16 lg:px-24 max-w-6xl mx-auto">
-          <p className="text-xs tracking-[0.2em] uppercase text-primary/70 font-medium mb-4">
-            What I Know
-          </p>
-          <h2
-            className="text-4xl md:text-5xl font-normal text-foreground mb-14 leading-tight"
-            style={{ fontFamily: "var(--font-serif)" }}
-          >
-            Skills &amp; Tools
-          </h2>
-
-          <div className="grid md:grid-cols-3 gap-10">
-            {Object.entries(skills).map(([category, items], i) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {certificates.map((c, i) => (
               <motion.div
-                key={category}
-                initial={{ opacity: 0, y: 20 }}
+                key={i}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
+                transition={{ duration: 0.45, delay: i * 0.08 }}
+                className="group overflow-hidden bg-card border border-border rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
-                <h3
-                  className="text-lg font-normal text-foreground mb-5 pb-4 border-b border-border"
-                  style={{ fontFamily: "var(--font-serif)" }}
-                >
-                  {category}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {items.map((skill) => (
-                    <span
-                      key={skill}
-                      className="text-sm px-3 py-1.5 bg-card border border-border text-foreground rounded-full hover:bg-secondary hover:text-primary hover:border-primary/20 transition-colors cursor-default"
-                    >
-                      {skill}
+                {/* Preview */}
+                <div className="overflow-hidden">
+                  <img
+                    src={c.image}
+                    alt={c.title}
+                    className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                  <span className="inline-block text-[10px] tracking-wider uppercase px-2.5 py-1 bg-secondary text-primary rounded-full font-medium mb-3">
+                    {c.category}
+                  </span>
+
+                  <h3 className="text-base font-semibold text-foreground leading-snug mb-1">
+                    {c.title}
+                  </h3>
+
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {c.issuer}
+                  </p>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      {c.date}
                     </span>
-                  ))}
+
+                    {c.link ? (
+                      <a
+                        href={c.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary flex items-center gap-1 hover:underline"
+                      >
+                        View
+                        <ExternalLink size={14} />
+                      </a>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">
+                        Certificate
+                      </span>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -710,7 +721,11 @@ export default function App() {
               }
               className="bg-white/10 border border-white/20 rounded-xl px-4 py-3.5 text-sm placeholder:text-[#C87070] text-white outline-none focus:border-white/50 transition-colors resize-none"
             />
-
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey="6LepplItAAAAAFjTKWLeAi0dKG8oB3G-R3jTwN5K"
+              onChange={(token) => setCaptcha(token)}
+            />
             <button
               type="submit"
               className="flex items-center justify-center gap-2 py-3.5 bg-[#FAF7F2] text-primary rounded-xl text-sm font-medium hover:bg-white transition-colors"
